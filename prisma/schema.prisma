@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  // type prisma: Int, String, Boolean, Datetime, ....
+
+  email    String  @unique
+  name     String // varchar()
+  bio      String? @db.Text
+  imageUrl String?
+
+  posts    Post[] // prisma
+  comments Comment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+
+  author   User @relation(fields: [authorId], references: [id]) // prisma
+  authorId Int
+
+  comments Comment[] // prisma
+  tags     Tag[] // prisma
+
+  title     String
+  content   String? @db.Text
+  published Boolean @default(false)
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  tagOnPosts TagOnPost[]
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+
+  createdAt DateTime @default(now())
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  posts Post[] // prisma
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  tagOnPosts TagOnPost[]
+}
+
+model TagOnPost {
+  tag   Tag @relation(fields: [tagId], references: [id])
+  tagId Int // 1
+
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int // 2
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([tagId, postId]) // (1, 2)
+}
