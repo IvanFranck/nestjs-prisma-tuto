@@ -22,9 +22,6 @@ export class TagsService {
   async findAll(): Promise<Tag[]> {
     try {
       return await this.prisma.tag.findMany({
-        include: {
-          posts: true
-        }
       });
     } catch (error) {
       console.log("🚀 ~ TagsService ~ findAll ~ error:", error)
@@ -36,9 +33,6 @@ export class TagsService {
     try {
       const tag = await this.prisma.tag.findUnique({
         where: {id},
-        include: {
-          posts: true
-        }
       })
 
       if(!tag){

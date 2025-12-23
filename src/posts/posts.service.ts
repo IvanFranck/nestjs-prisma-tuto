@@ -21,13 +21,7 @@ export class PostsService {
 
   async findAll(): Promise<Post[]> {
     try {
-      return await this.prisma.post.findMany({
-        include: {
-          author: true,
-          comments: true,
-          tags: true
-        }
-      });
+      return await this.prisma.post.findMany();
     } catch (error) {
       console.log("🚀 ~ PostsService ~ findAll ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la récupération de la liste des posts')
@@ -38,11 +32,6 @@ export class PostsService {
     try {
       const post = await this.prisma.post.findUnique({
         where: {id},
-        include: {
-          author: true,
-          comments: true,
-          tags: true
-        }
       })
 
       if(!post){

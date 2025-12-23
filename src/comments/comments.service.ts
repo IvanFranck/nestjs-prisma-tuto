@@ -22,10 +22,6 @@ export class CommentsService {
   async findAll(): Promise<Comment[]> {
     try {
       return await this.prisma.comment.findMany({
-        include: {
-          author: true,
-          post: true
-        }
       });
     } catch (error) {
       console.log("🚀 ~ CommentsService ~ findAll ~ error:", error)
@@ -37,10 +33,6 @@ export class CommentsService {
     try {
       const comment = await this.prisma.comment.findUnique({
         where: {id},
-        include: {
-          author: true,
-          post: true
-        }
       })
 
       if(!comment){
