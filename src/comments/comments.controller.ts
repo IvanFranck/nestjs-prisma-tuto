@@ -17,6 +17,11 @@ export class CommentsController {
     return await this.commentsService.findAll();
   }
 
+  @Get('post/:postId')
+  findByPost(@Param('postId') postId: string) {
+    return this.commentsService.findByPost(+postId);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.commentsService.findOne(+id);

@@ -22,6 +22,11 @@ export class PostsController {
     return await this.postsService.findOne(+id);
   }
 
+  @Get('author/:authorId')
+  findByAuthor(@Param('authorId') authorId: string) {
+    return this.postsService.findByAuthor(+authorId);
+  }
+
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return await this.postsService.update(+id, updatePostDto);

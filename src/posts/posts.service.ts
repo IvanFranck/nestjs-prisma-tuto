@@ -114,4 +114,16 @@ export class PostsService {
       throw new InternalServerErrorException(`Erreur lors de la suppression du post avec l'id ${id}`)
     };
   }
+
+  async findByAuthor(authorId: number) {
+    return this.prisma.post.findMany({
+      where: { authorId },
+      include: {
+        tags: true,
+        _count: {
+          select: { comments: true },
+        },
+      },
+    });
+  }
 }
