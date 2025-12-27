@@ -10,19 +10,26 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       return await this.prisma.user.create({
-        data: createUserDto
+        data: createUserDto,
       })
     } catch (error) {
-      console.log("🚀 ~ UsersService ~ create ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la création de l\'utilisateur ')
     }
   }
 
   async findAll(): Promise<User[]> {
     try {
-      return await this.prisma.user.findMany();
+      return await this.prisma.user.findMany({
+        include: {
+          _count: {
+            select: {
+              posts: true,
+              comments: true,
+            },
+          },
+        },
+      });
     } catch (error) {
-      console.log("🚀 ~ UsersService ~ findAll ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la récupération de la liste des users')
     }
   }

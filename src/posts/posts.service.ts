@@ -11,19 +11,33 @@ export class PostsService {
   async create(createPostDto: CreatePostDto): Promise<Post> {
     try {
       return await this.prisma.post.create({
-        data: createPostDto
+        data: createPostDto,
+        include: {
+          author:  {
+            select:  {name: true, email: true, imageUrl: true}
+          },
+          tags: true,
+        }
       })
     } catch (error) {
-      console.log("🚀 ~ PostsService ~ create ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la création du post')
     }
   }
 
   async findAll(): Promise<Post[]> {
     try {
-      return await this.prisma.post.findMany();
+      return await this.prisma.post.findMany({
+        include: {
+          author:  {
+            select:  {name: true, email: true, imageUrl: true}
+          },
+          tags: true,
+          _count: {
+            select: {comments: true}
+          }
+        }
+      });
     } catch (error) {
-      console.log("🚀 ~ PostsService ~ findAll ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la récupération de la liste des posts')
     }
   }
@@ -32,6 +46,23 @@ export class PostsService {
     try {
       const post = await this.prisma.post.findUnique({
         where: {id},
+        include: {
+          author:  {
+            select:  {name: true, email: true, imageUrl: true, bio: true}
+          },
+          tags: true,
+          comments: {
+            take: 3,
+            include: {
+              author: {
+                select: {name: true, email: true, imageUrl: true}
+              }
+            }
+          },
+          _count: {
+            select: {comments: true}
+          }
+        }
       })
 
       if(!post){
@@ -48,7 +79,24 @@ export class PostsService {
      try {
       return await this.prisma.post.update({
         where: {id},
-        data: updatePostDto
+        data: updatePostDto,
+        include: {
+          author:  {
+            select:  {name: true, email: true, imageUrl: true, bio: true}
+          },
+          tags: true,
+          comments: {
+            take: 3,
+            include: {
+              author: {
+                select: {name: true, email: true, imageUrl: true}
+              }
+            }
+          },
+          _count: {
+            select: {comments: true}
+          }
+        }
       })
 
     } catch (error) {
