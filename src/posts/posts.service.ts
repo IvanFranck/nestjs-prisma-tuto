@@ -10,15 +10,34 @@ export class PostsService {
 
   async create(createPostDto: CreatePostDto): Promise<Post> {
     try {
-      return await this.prisma.post.create({
-        data: createPostDto,
-        include: {
-          author:  {
-            select:  {name: true, email: true, imageUrl: true}
-          },
-          tags: true,
-        }
-      })
+      const { tags, ...postData } = createPostDto;
+
+    return this.prisma.post.create({
+      data: {
+        ...postData,
+        tag: tags
+          ? {
+              create: tags.map((tag) => ({
+                tag: {
+                  connectOrCreate: {
+                    where: { name: tag },
+                    create: { name: tag },
+                  },
+                },
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        author: {
+          select: { id: true, name: true, email: true },
+        },
+        tags: true,
+        _count: {
+          select: { comments: true },
+        },
+      },
+    });
     } catch (error) {
       throw new InternalServerErrorException('Erreur lors de la création du post')
     }
@@ -76,28 +95,37 @@ export class PostsService {
   }
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
-     try {
+    const { tags, ...postData } = updatePostDto;
+     
+    try {
       return await this.prisma.post.update({
-        where: {id},
-        data: updatePostDto,
+        where: { id },
+        data: {
+          ...postData,
+          tag: tags
+            ? {
+                set: [], // Supprime tous les tags existants
+                create: tags.map((tag) => ({
+                  tag: {
+                    connectOrCreate: {
+                      where: { name: tag },
+                      create: { name: tag },
+                    },
+                  },
+                })),
+              }
+            : undefined,
+        },
         include: {
-          author:  {
-            select:  {name: true, email: true, imageUrl: true, bio: true}
+          author: {
+            select: { id: true, name: true, email: true },
           },
           tags: true,
-          comments: {
-            take: 3,
-            include: {
-              author: {
-                select: {name: true, email: true, imageUrl: true}
-              }
-            }
-          },
           _count: {
-            select: {comments: true}
-          }
-        }
-      })
+            select: { comments: true },
+          },
+        },
+      });
 
     } catch (error) {
       throw new InternalServerErrorException(`Erreur lors de la mise à jour du post avec l'id ${id}`)
