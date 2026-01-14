@@ -11,10 +11,17 @@ export class CommentsService {
   async create(createCommentDto: CreateCommentDto): Promise<Comment> {
     try {
       return await this.prisma.comment.create({
-        data: createCommentDto
+        data: createCommentDto,
+        include: {
+          author: {
+            select: { id: true, name: true, imageUrl: true },
+          },
+          post: {
+            select: { id: true, title: true },
+          },
+        },
       })
     } catch (error) {
-      console.log("🚀 ~ CommentsService ~ create ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la création du commentaire')
     }
   }
@@ -24,15 +31,34 @@ export class CommentsService {
       return await this.prisma.comment.findMany({
       });
     } catch (error) {
-      console.log("🚀 ~ CommentsService ~ findAll ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la récupération de la liste des commentaires')
     }
+  }
+
+  async findByPost(postId: number) {
+    return this.prisma.comment.findMany({
+      where: { postId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: {
+          select: { id: true, name: true },
+        },
+      },
+    });
   }
 
   async findOne(id: number): Promise<Comment> {
     try {
       const comment = await this.prisma.comment.findUnique({
         where: {id},
+        include: {
+          author: {
+            select: { id: true, name: true, email: true, imageUrl: true },
+          },
+          post: {
+            select: { id: true, title: true },
+          },
+        },
       })
 
       if(!comment){
@@ -49,7 +75,15 @@ export class CommentsService {
      try {
       return await this.prisma.comment.update({
         where: {id},
-        data: updateCommentDto
+        data: updateCommentDto,
+        include: {
+          author: {
+            select: { id: true, name: true, imageUrl: true },
+          },
+          post: {
+            select: { id: true, title: true },
+          },
+        },
       })
 
     } catch (error) {

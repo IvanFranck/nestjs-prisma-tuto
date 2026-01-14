@@ -1,8 +1,8 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '../../generated/prisma/client';
+import { Prisma, User } from '../../generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -10,19 +10,31 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       return await this.prisma.user.create({
-        data: createUserDto
+        data: createUserDto,
       })
     } catch (error) {
-      console.log("🚀 ~ UsersService ~ create ~ error:", error)
-      throw new InternalServerErrorException('Erreur lors de la création de l\'utilisateur ')
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Email already exists'); // erreur 409
+        }
+      }
+      throw error;
     }
   }
 
   async findAll(): Promise<User[]> {
     try {
-      return await this.prisma.user.findMany();
+      return await this.prisma.user.findMany({
+        include: {
+          _count: {
+            select: {
+              posts: true,
+              comments: true,
+            },
+          },
+        },
+      });
     } catch (error) {
-      console.log("🚀 ~ UsersService ~ findAll ~ error:", error)
       throw new InternalServerErrorException('Erreur lors de la récupération de la liste des users')
     }
   }
