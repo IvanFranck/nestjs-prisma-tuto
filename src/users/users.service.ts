@@ -1,8 +1,8 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '../../generated/prisma/client';
+import { Prisma, User } from '../../generated/prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -13,7 +13,12 @@ export class UsersService {
         data: createUserDto,
       })
     } catch (error) {
-      throw new InternalServerErrorException('Erreur lors de la création de l\'utilisateur ')
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Email already exists'); // erreur 409
+        }
+      }
+      throw error;
     }
   }
 

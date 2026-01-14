@@ -4,6 +4,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Post } from '../../generated/prisma/client';
 import { QueryPostDto } from './dto/query-post.dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class PostsService {
@@ -40,6 +41,12 @@ export class PostsService {
       },
     });
     } catch (error) {
+      console.log("🚀 ~ PostsService ~ create ~ error:", error)
+      if (error instanceof PrismaClientKnownRequestError){
+        if(error.code === 'P2003') {
+          throw new NotFoundException('Author not found')
+        }
+      }
       throw new InternalServerErrorException('Erreur lors de la création du post')
     }
   }
@@ -146,10 +153,16 @@ export class PostsService {
         },
       });
 
-    } catch (error) {
+    }  catch (error) {
+      console.log("🚀 ~ PostsService ~ update ~ error:", error)
+      if (error instanceof PrismaClientKnownRequestError){
+        if(error.code === 'P2025') {
+          throw new NotFoundException('Post not found')
+        }
+      }
       throw new InternalServerErrorException(`Erreur lors de la mise à jour du post avec l'id ${id}`)
     }
-  }
+    }
 
   async remove(id: number) {
     try {
