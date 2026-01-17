@@ -17,16 +17,12 @@ export class PostsService {
     return this.prisma.post.create({
       data: {
         ...postData,
-        tag: tags
+        tags: tags
           ? {
-              create: tags.map((tag) => ({
-                tag: {
-                  connectOrCreate: {
-                    where: { name: tag },
-                    create: { name: tag },
-                  },
-                },
-              })),
+              connectOrCreate: tags.map((tag) => ({
+                where: {name: tag},
+                create: {name: tag}
+              }))
             }
           : undefined,
       },
@@ -128,17 +124,13 @@ export class PostsService {
         where: { id },
         data: {
           ...postData,
-          tag: tags
+          tags: tags
             ? {
                 set: [], // Supprime tous les tags existants
-                create: tags.map((tag) => ({
-                  tag: {
-                    connectOrCreate: {
-                      where: { name: tag },
-                      create: { name: tag },
-                    },
-                  },
-                })),
+                connectOrCreate: tags.map((tag) => ({
+                  where: {name: tag},
+                  create: {name: tag}
+                }))
               }
             : undefined,
         },
