@@ -7,6 +7,7 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { TagsModule } from './tags/tags.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { ConfigModule } from '@nestjs/config';
     TagsModule,
     ConfigModule.forRoot({
       isGlobal: true,
-    })
+    }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
