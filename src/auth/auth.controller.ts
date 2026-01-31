@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { RegisterDto } from './dtos/register.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
@@ -8,28 +8,27 @@ import { RefreshJwtGuard } from '../common/guards/refresh-jwt.guard';
 
 @Controller('auth')
 export class AuthController {
+  constructor(private readonly authServcie: AuthService) {}
 
-    constructor(private readonly authServcie: AuthService){}
+  @Post('register')
+  async register(@Body() dto: RegisterDto) {
+    return await this.authServcie.register(dto);
+  }
 
-    @Post('register')
-    async register(@Body() dto: RegisterDto){
-        return await this.authServcie.register(dto)
-    }
+  @Post('login')
+  async login(@Body() dto: LoginDto) {
+    return await this.authServcie.login(dto);
+  }
 
-    @Post('login')
-    async login(@Body() dto: LoginDto){
-        return await this.authServcie.login(dto)
-    }
+  @Get('me')
+  @UseGuards(JwtGuard)
+  async getUserInfos(@GetUser('id') userId: number) {
+    return await this.authServcie.getUserInfo(userId);
+  }
 
-    @Get('me')
-    @UseGuards(JwtGuard)
-    async getUserInfos(@GetUser('id') userId: number) {
-        return await this.authServcie.getUserInfo(userId)
-    }
-
-    @Post('logout')
-    @UseGuards(RefreshJwtGuard)
-    async logout(@GetUser('id') userId: number) {
-        return await this.authServcie.logout(userId)
-    }
+  @Post('logout')
+  @UseGuards(RefreshJwtGuard)
+  async logout(@GetUser('id') userId: number) {
+    return await this.authServcie.logout(userId);
+  }
 }
