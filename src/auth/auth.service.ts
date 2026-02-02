@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RegisterDto } from './dtos/register.dto';
+import { RegisterUserDto } from './dtos/register.dto';
 import bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { LoginDto } from './dtos/login.dto';
@@ -25,7 +25,7 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterUserDto) {
     try {
       const { password, ...data } = dto;
       const hasedPassword = await bcrypt.hash(password, 10);

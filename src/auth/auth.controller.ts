@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { RegisterDto } from './dtos/register.dto';
+import { RegisterUserDto } from './dtos/register.dto';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { JwtGuard } from '../common/guards/jwt.guard';
@@ -11,7 +11,7 @@ export class AuthController {
   constructor(private readonly authServcie: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
+  async register(@Body() dto: RegisterUserDto) {
     return await this.authServcie.register(dto);
   }
 

@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -24,12 +26,22 @@ export class PostsController {
 
   @Get()
   async findAll(@Query() query: QueryPostDto) {
+    console.log('query', typeof query.limit, typeof query.page);
     return await this.postsService.findAll(query);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.postsService.findOne(+id);
+  async findOne(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        exceptionFactory: () =>
+          new BadRequestException("l'id doit être un nombre"),
+      }),
+    )
+    id: number,
+  ) {
+    return await this.postsService.findOne(id);
   }
 
   @Get('author/:authorId')
