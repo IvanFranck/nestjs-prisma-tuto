@@ -58,6 +58,9 @@ export class PostsService {
     try {
       const [posts, total] = await this.prisma.$transaction([
         this.prisma.post.findMany({
+          where: {
+            published: query.published,
+          },
           skip,
           take: limit,
           orderBy: { createdAt: 'desc' },

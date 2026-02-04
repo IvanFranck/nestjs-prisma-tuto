@@ -7,6 +7,10 @@ import {
   Param,
   Delete,
   Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+  ParseBoolPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -23,12 +27,51 @@ export class PostsController {
   }
 
   @Get()
-  async findAll(@Query() query: QueryPostDto) {
+  async findAll(
+    @Query(
+      'limit',
+      new DefaultValuePipe(10),
+      new ParseIntPipe({
+        exceptionFactory: () =>
+          new BadRequestException('la limit doit être un nombre entier'),
+      }),
+    )
+    limit: number,
+    @Query(
+      'page',
+      new DefaultValuePipe(1),
+      new ParseIntPipe({
+        exceptionFactory: () =>
+          new BadRequestException('la page doit être un nombre entier'),
+      }),
+    )
+    page: number,
+    @Query(
+      'published',
+      new DefaultValuePipe(true),
+      new ParseBoolPipe({
+        exceptionFactory: () =>
+          new BadRequestException(
+            "le status published doit être soit 'true' soit 'false'",
+          ),
+      }),
+    )
+    published: boolean,
+  ) {
+    const query: QueryPostDto = {
+      limit,
+      page,
+      published,
+    };
     return await this.postsService.findAll(query);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(
+    @Param('id', ParseIntPipe)
+    id: string,
+  ) {
+    console.log('type id', typeof id);
     return await this.postsService.findOne(+id);
   }
 
