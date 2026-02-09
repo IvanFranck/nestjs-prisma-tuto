@@ -16,6 +16,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { QueryPostDto } from './dto/query-post.dto';
+import { ArticleExistPipe } from '../common/pipes/article-exist.pipe';
 
 @Controller('posts')
 export class PostsController {
@@ -68,11 +69,10 @@ export class PostsController {
 
   @Get(':id')
   async findOne(
-    @Param('id', ParseIntPipe)
-    id: string,
+    @Param('id', ParseIntPipe, ArticleExistPipe)
+    id: number,
   ) {
-    console.log('type id', typeof id);
-    return await this.postsService.findOne(+id);
+    return await this.postsService.findOne(id);
   }
 
   @Get('author/:authorId')
@@ -81,7 +81,10 @@ export class PostsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+  async update(
+    @Param('id', ParseIntPipe, ArticleExistPipe) id: number,
+    @Body() updatePostDto: UpdatePostDto,
+  ) {
     return await this.postsService.update(+id, updatePostDto);
   }
 

@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { ArticleExistPipe } from '../common/pipes/article-exist.pipe';
 
 @Controller('comments')
 export class CommentsController {
@@ -26,7 +28,7 @@ export class CommentsController {
   }
 
   @Get('post/:postId')
-  findByPost(@Param('postId') postId: string) {
+  findByPost(@Param('postId', ParseIntPipe, ArticleExistPipe) postId: string) {
     return this.commentsService.findByPost(+postId);
   }
 

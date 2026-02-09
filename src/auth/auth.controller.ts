@@ -5,13 +5,15 @@ import { LoginDto } from './dtos/login.dto';
 import { JwtGuard } from '../common/guards/jwt.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { RefreshJwtGuard } from '../common/guards/refresh-jwt.guard';
+import { RegisterUserValidationPipe } from '../common/pipes/register-user-validation.pipe';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authServcie: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
+  async register(@Body(RegisterUserValidationPipe) dto: RegisterDto) {
+    console.log('🚀 ~ AuthController ~ register ~ dto:', dto);
     return await this.authServcie.register(dto);
   }
 
